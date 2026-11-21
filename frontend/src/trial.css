@@ -1,0 +1,31 @@
+.trial-panel{margin-top:26px;padding-bottom:20px}
+.trial-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line)}
+.trial-toolbar b{font-size:13px;letter-spacing:.4px}
+.trial-toolbar .mini.seal{color:var(--amber);border-color:#7d6629}
+.trial-hint{color:var(--muted);font:10px 'IBM Plex Mono';flex:1 1 240px}
+.trial-counts{display:flex;flex-wrap:wrap;gap:18px;padding:14px 22px 4px;color:var(--muted);font:11px 'IBM Plex Mono'}
+.trial-counts b{color:var(--text);font-size:14px;margin-left:5px}
+.trial-counts .warn-text b{color:var(--amber)}
+.trial-counts .muted-text b{color:var(--red)}
+.trial-table{width:calc(100% - 44px);margin:10px 22px;border-collapse:collapse;font-size:12px}
+.trial-table th{text-align:left;color:var(--muted);font:10px 'IBM Plex Mono';letter-spacing:.8px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.trial-table td{padding:10px;border-bottom:1px solid #16303f;vertical-align:middle}
+.trial-table tr.row-down{background:rgba(255,200,87,.07)}
+.trial-table tr.row-miss{background:rgba(255,107,114,.08)}
+.trial-table tr.row-late td{opacity:.62}
+.arrow{font:10px 'IBM Plex Mono';padding:3px 7px;border:1px solid var(--line);border-radius:3px;white-space:nowrap}
+.arrow.down{color:var(--amber);border-color:#7d6629}
+.arrow.up{color:var(--red);border-color:#833a45}
+.arrow.same{color:var(--mint);border-color:#287a68}
+.arrow.none{color:var(--muted)}
+.status.missing_at_seal{color:var(--red);border-color:#833a45}
+.status.failed{color:var(--red);border-color:#833a45}
+.status.excluded_late{color:var(--muted);border-color:var(--line)}
+.trial-archive{margin:6px 22px 0;border:1px solid var(--line);border-radius:6px;padding:10px 14px;background:var(--panel2)}
+.trial-archive summary{cursor:pointer;color:var(--muted);font:11px 'IBM Plex Mono'}
+.trial-archive .trial-table{width:100%;margin:12px 0 4px}
+.trial-legend{display:flex;flex-wrap:wrap;gap:20px;padding:12px 22px 2px;color:var(--muted);font:10px 'IBM Plex Mono'}
+.trial-legend .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.trial-legend .dot.down{background:var(--amber)}
+.trial-legend .dot.miss{background:var(--red)}
+.trial-legend .dot.late{background:var(--muted)}

@@ -1,8 +1,9 @@
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
 from src.database import Base, SessionLocal, engine
-from src.models import User, VesselCall, ContainerCheck, GateEvent, DelayCase, DispatchAction
+from src.models import User, VesselCall, ContainerCheck, GateEvent, DelayCase, DispatchAction, AnalysisJob
 from src.security import hash_password
+from src.services import build_features
 
 
 def dt(day, hour, minute=0):
@@ -67,6 +68,10 @@ def seed():
             case = db.execute(select(DelayCase).where(DelayCase.case_no == "CASE-HAI-001")).scalar_one()
             case.status = "dispatched"; case.final_level = "major"
             case.model_output = {"label": "major", "confidence": 0.84, "seed": 42, "note": "seed演示结果"}
+            case.feature_snapshot = build_features(db, case.vessel)
+            db.add(AnalysisJob(case_id=case.id, job_type="delay_triage", job_scope="official",
+                               status="succeeded", input_summary=case.feature_snapshot,
+                               result=case.model_output, finished_at=dt(21, 7, 5)))
             db.add(DispatchAction(case_id=case.id, action_type="冷藏箱优先卸船", assignee="C12夜班桥吊组", due_at=dt(21, 8, 30), status="queued", instruction="将MSCU100002置于前两吊，完成后回报调度台"))
         if not db.execute(select(DispatchAction).where(DispatchAction.action_type == "查验单证补录")).scalar_one_or_none():
             case = db.execute(select(DelayCase).where(DelayCase.case_no == "CASE-TRI-002")).scalar_one()

@@ -88,15 +88,49 @@ class DispatchAction(Base):
 
 class AnalysisJob(Base):
     __tablename__ = "analysis_jobs"
+    __table_args__ = (UniqueConstraint("trial_run_id", "case_id", name="uq_trial_job_case"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     case_id: Mapped[int] = mapped_column(ForeignKey("delay_cases.id"), index=True)
     job_type: Mapped[str] = mapped_column(String(32), default="delay_triage")
+    job_scope: Mapped[str] = mapped_column(String(20), default="official")
+    trial_run_id: Mapped[int | None] = mapped_column(ForeignKey("trial_runs.id"), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(20), default="queued")
     input_summary: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+class TrialRun(Base):
+    __tablename__ = "trial_runs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    status: Mapped[str] = mapped_column(String(20), default="running")
+    created_by: Mapped[str] = mapped_column(String(40))
+    sealed_by: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    sealed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    results: Mapped[list["TrialResult"]] = relationship(back_populates="trial", cascade="all, delete-orphan")
+
+class TrialResult(Base):
+    __tablename__ = "trial_results"
+    __table_args__ = (UniqueConstraint("trial_run_id", "case_id", name="uq_trial_result_case"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    trial_run_id: Mapped[int] = mapped_column(ForeignKey("trial_runs.id"), index=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("delay_cases.id"), index=True)
+    official_job_id: Mapped[int] = mapped_column(ForeignKey("analysis_jobs.id"))
+    shadow_job_id: Mapped[int | None] = mapped_column(ForeignKey("analysis_jobs.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="queued")
+    input_snapshot: Mapped[dict] = mapped_column(JSON)
+    official_level: Mapped[str] = mapped_column(String(20))
+    candidate_level: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    official_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    candidate_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    excluded_late: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now_utc, onupdate=now_utc)
+    trial: Mapped[TrialRun] = relationship(back_populates="results")
+    case: Mapped[DelayCase] = relationship()
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"

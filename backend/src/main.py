@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from .casework_routes import router as operational_cases
 from .operations_evidence import router as operations_evidence
+from .trial_routes import router as trial_router
 from .database import Base, engine
 from .routes import router
 from scripts.seed_demo import seed
@@ -21,6 +22,7 @@ async def lifespan(app):
 app = FastAPI(title="Container Delay Triage", version="1.0.0", lifespan=lifespan)
 app.include_router(operational_cases)
 app.include_router(operations_evidence)
+app.include_router(trial_router)
 app.include_router(router)
 
 @app.get("/health")

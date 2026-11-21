@@ -45,3 +45,6 @@ class DispatchIn(BaseModel):
 
 class CustomsUpdate(BaseModel):
     customs_status: str
+
+class TrialStartIn(BaseModel):
+    note: str = Field(default="", max_length=500)

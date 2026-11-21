@@ -21,7 +21,7 @@ def vessel_dict(v: VesselCall, db):
 def case_dict(c: DelayCase, db):
     jobs = db.execute(select(AnalysisJob).where(AnalysisJob.case_id == c.id).order_by(AnalysisJob.id.desc())).scalars().all()
     actions = [{"id": a.id, "action_type": a.action_type, "assignee": a.assignee, "due_at": a.due_at.isoformat(), "status": a.status, "instruction": a.instruction} for a in c.actions]
-    return {"id": c.id, "case_no": c.case_no, "vessel_id": c.vessel_id, "vessel": c.vessel.call_no if c.vessel else "", "vessel_name": c.vessel.vessel_name if c.vessel else "", "requested_level": c.requested_level, "final_level": c.final_level, "status": c.status, "reason": c.reason, "feature_snapshot": c.feature_snapshot, "model_output": c.model_output, "exception_reason": c.exception_reason, "jobs": [{"id": j.id, "status": j.status, "result": j.result, "error": j.error, "finished_at": j.finished_at.isoformat() if j.finished_at else None} for j in jobs], "actions": actions}
+    return {"id": c.id, "case_no": c.case_no, "vessel_id": c.vessel_id, "vessel": c.vessel.call_no if c.vessel else "", "vessel_name": c.vessel.vessel_name if c.vessel else "", "requested_level": c.requested_level, "final_level": c.final_level, "status": c.status, "reason": c.reason, "feature_snapshot": c.feature_snapshot, "model_output": c.model_output, "exception_reason": c.exception_reason, "jobs": [{"id": j.id, "status": j.status, "scope": j.job_scope, "trial_run_id": j.trial_run_id, "result": j.result, "error": j.error, "finished_at": j.finished_at.isoformat() if j.finished_at else None} for j in jobs], "actions": actions}
 
 @router.post("/auth/login")
 def login(payload: LoginIn, db: Session = Depends(get_db)):
@@ -115,7 +115,7 @@ def classify(case_id: int, db: Session = Depends(get_db), user: User = Depends(r
         log(db, user, "triage_blocked", "delay_case", case.id, case.exception_reason); db.commit()
         raise HTTPException(status_code=409, detail={"code": "DOMAIN_PRECHECK", "message": case.exception_reason, "case": case_dict(case, db)})
     case.status = "queued"; case.exception_reason = None
-    job = AnalysisJob(case_id=case.id, status="queued", input_summary=features)
+    job = AnalysisJob(case_id=case.id, status="queued", job_scope="official", input_summary=features)
     db.add(job); db.flush(); log(db, user, "triage_queued", "analysis_job", job.id, json.dumps(features, ensure_ascii=False)); db.commit()
     redis_client.rpush("container_delay_triage_jobs", str(job.id))
     return {"case": case_dict(case, db), "job_id": job.id, "message": "已排入交叉特征分级队列"}
